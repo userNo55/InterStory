@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Stories</title>
+    <style>
+        :root {
+            --primary-color: #FF6B99;
+            --secondary-color: #4DE3E3;
+            --accent-color: #FFE74C;
+            --background-color: #000033;
+            --text-color: #FFFFFF;
+            --neon-shadow: 0 0 10px #FF6B99, 0 0 20px #FF6B99, 0 0 30px #FF6B99;
+        }
+
+        body {
+            font-family: 'VT323', 'Press Start 2P', monospace;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            background-image: linear-gradient(0deg, #000033 0%, #000066 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 15px rgba(255, 107, 153, 0.5);
+        }
+
+        .header h1 {
+            text-shadow: var(--neon-shadow);
+            font-size: 2.5rem;
+            margin: 0;
+            background: linear-gradient(to right, #FF6B99, #4DE3E3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .search-icon, .profile-pic {
+            width: 2.5rem;
+            height: 2.5rem;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(0, 0, 51, 0.8);
+        }
+
+        .tab {
+            padding: 0.8rem 2rem;
+            background: transparent;
+            color: var(--text-color);
+            border: 2px solid var(--primary-color);
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab:hover {
+            background: var(--primary-color);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+
+        .tab.active {
+            background: var(--primary-color);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        .story-list {
+            padding: 1rem;
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+
+        .story-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border: 2px solid var(--secondary-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .story-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 0 20px var(--secondary-color);
+        }
+
+        .story-card h3 {
+            color: var(--accent-color);
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+            text-shadow: 0 0 5px var(--accent-color);
+        }
+
+        .timer {
+            color: var(--primary-color);
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+
+        .search-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 51, 0.95);
+            padding: 2rem;
+            border: 2px solid var(--secondary-color);
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 0 20px var(--secondary-color);
+            z-index: 1000;
+        }
+
+        .search-modal.active {
+            display: block;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 51, 0.8);
+            z-index: 999;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+
+        .search-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-form input, .search-form select {
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--secondary-color);
+            color: var(--text-color);
+            border-radius: 5px;
+        }
+
+        .search-form button {
+            padding: 1rem;
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .search-form button:hover {
+            background: var(--secondary-color);
+            box-shadow: 0 0 15px var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .story-list {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .search-modal {
+                width: 90%;
+                padding: 1rem;
+            }
+
+            .tab-container {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .tab {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Interactive Stories</h1>
+        <div class="nav-buttons">
+            <img src="/api/placeholder/40/40" alt="Search" class="search-icon" onclick="toggleSearch()">
+            <img src="/api/placeholder/40/40" alt="Profile" class="profile-pic" onclick="openProfile()">
+        </div>
+    </header>
+
+    <div class="tab-container">
+        <button class="tab active" onclick="switchTab('active')">Active</button>
+        <button class="tab" onclick="switchTab('written')">Written</button>
+        <button class="tab" onclick="switchTab('followings')">Followings</button>
+    </div>
+
+    <div id="active-stories" class="story-list">
+        <div class="story-card" onclick="openStory('story1')">
+            <h3>The Mystery of Dark Manor</h3>
+            <p>Author: Alex Peterson</p>
+            <p class="timer">Time remaining: 23:45:12</p>
+            <p>Readers: 1,234</p>
+        </div>
+        <div class="story-card" onclick="openStory('story2')">
+            <h3>Time Traveler's Diary</h3>
+            <p>Author: Maria Johnson</p>
+            <p class="timer">Time remaining: 11:30:00</p>
+            <p>Readers: 2,567</p>
+        </div>
+    </div>
+
+    <div id="written-stories" class="story-list" style="display: none;">
+        <div class="story-card" onclick="openStory('story3')">
+            <h3>The Last Hero</h3>
+            <p>Author: David Smith</p>
+            <p>Readers: 5,678</p>
+        </div>
+        <div class="story-card" onclick="openStory('story4')">
+            <h3>Red Moon Rising</h3>
+            <p>Author: Helen Morrison</p>
+            <p>Readers: 3,456</p>
+        </div>
+    </div>
+
+    <div id="followings-stories" class="story-list" style="display: none;">
+        <div class="story-card" onclick="openStory('story5')">
+            <h3>Cyber Dreams</h3>
+            <p>Author: James Wilson</p>
+            <p class="timer">Time remaining: 15:20:00</p>
+            <p>Readers: 4,321</p>
+        </div>
+        <div class="story-card" onclick="openStory('story6')">
+            <h3>Neon Nights</h3>
+            <p>Author: Sarah Blake</p>
+            <p>Readers: 6,789</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" onclick="toggleSearch()"></div>
+    <div class="search-modal">
+        <h2>Search Stories</h2>
+        <form class="search-form">
+            <input type="text" placeholder="Keywords">
+            <select>
+                <option>All Sizes</option>
+                <option>Short Stories</option>
+                <option>Medium Length</option>
+                <option>Long Stories</option>
+            </select>
+            <select>
+                <option>All Age Ratings</option>
+                <option>12+</option>
+                <option>16+</option>
+                <option>18+</option>
+            </select>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            const activeStories = document.getElementById('active-stories');
+            const writtenStories = document.getElementById('written-stories');
+            const followingsStories = document.getElementById('followings-stories');
+            const tabs = document.querySelectorAll('.tab');
+
+            tabs.forEach(t => t.classList.remove('active'));
+
+            switch(tab) {
+                case 'active':
+                    activeStories.style.display = 'grid';
+                    writtenStories.style.display = 'none';
+                    followingsStories.style.display = 'none';
+                    tabs[0].classList.add('active');
+                    break;
+                case 'written':
+                    activeStories.style.display = 'none';
+                    writtenStories.style.display = 'grid';
+                    followingsStories.style.display = 'none';
+                    tabs[1].classList.add('active');
+                    break;
+                case 'followings':
+                    activeStories.style.display = 'none';
+                    writtenStories.style.display = 'none';
+                    followingsStories.style.display = 'grid';
+                    tabs[2].classList.add('active');
+                    break;
+            }
+        }
+
+        function toggleSearch() {
+            const modal = document.querySelector('.search-modal');
+            const overlay = document.querySelector('.modal-overlay');
+            modal.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function openProfile() {
+            window.location.href = '/profile';
+        }
+
+        function openStory(storyId) {
+            window.location.href = `story.html?id=${storyId}`;
+        }
+    </script>
+
+</body></html>
