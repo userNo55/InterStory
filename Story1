@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Page</title>
+    <style>
+        /* Your existing CSS styles here */
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Interactive Stories</h1>
+        <div class="nav-buttons">
+            <svg class="search-icon" onclick="toggleSearch()" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <img src="/api/placeholder/40/40" alt="Profile" class="profile-pic" onclick="openProfile()">
+        </div>
+    </header>
+    <div class="story-container" id="storyContent">
+        <!-- Content will be loaded dynamically -->
+    </div>
+
+    <script>
+        // Sample story data structure
+        const storyData = {
+            stories: {
+                'dark-manor': {
+                    id: 'dark-manor',
+                    title: 'The Mystery of Dark Manor',
+                    author: 'Alex Peterson',
+                    readers: 1234,
+                    chapters: [
+                        {
+                            id: 1,
+                            title: 'The Arrival',
+                            content: 'The old manor loomed before me, its gothic spires reaching toward the stormy sky...',
+                            status: 'completed',
+                            votingResults: [
+                                { option: 'Enter through the front door', votes: 65, winner: true },
+                                { option: 'Look for a back entrance', votes: 35, winner: false }
+                            ]
+                        },
+                        {
+                            id: 2,
+                            title: 'Dark Corridors',
+                            content: 'The heavy door creaked open, revealing a dimly lit hallway...',
+                            status: 'active',
+                            votingOptions: [
+                                'Follow the strange sounds upstairs',
+                                'Investigate the flickering light in the basement',
+                                'Search the ground floor first'
+                            ],
+                            timeRemaining: '23:45:12'
+                        }
+                    ],
+                    status: 'Active',
+                    ageRating: '16+'
+                }
+                // Add more stories here
+            }
+        };
+
+        function loadStory(storyId) {
+            const story = storyData.stories[storyId];
+            if (!story) return;
+
+            const container = document.getElementById('storyContent');
+            container.innerHTML = `
+                <a href="index.html" class="back-button">← Back to Stories</a>
+                <div class="story-header">
+                    <div class="story-info">
+                        <div class="story-main">
+                            <h2>${story.title}</h2>
+                            <p>By ${story.author}</p>
+                        </div>
+                        <div class="story-meta">
+                            <p>Readers: ${story.readers}</p>
+                            <p>Chapters: ${story.chapters.length}</p>
+                            <p>Status: ${story.status}</p>
+                            <p>Age Rating: ${story.ageRating}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chapters-list">
+                    ${renderChapters(story.chapters)}
+                </div>
+            `;
+        }
+
+        function renderChapters(chapters) {
+            return chapters.map(chapter => `
+                <div class="chapter-item" onclick="toggleChapter('chapter${chapter.id}')">
+                    <h3>Chapter ${chapter.id}: ${chapter.title}</h3>
+                    <div id="chapter${chapter.id}" class="chapter-content">
+                        <div class="chapter-text">
+                            <p>${chapter.content}</p>
+                            ${renderVoting(chapter)}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderVoting(chapter) {
+            if (chapter.status === 'completed') {
+                return `
+                    <div class="voting-section">
+                        <h4>Previous Voting Results:</h4>
+                        ${renderVotingResults(chapter.votingResults)}
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="voting-section">
+                        <h4>Current Voting:</h4>
+                        <div class="voting-options">
+                            ${chapter.votingOptions.map((option, index) => `
+                                <button class="vote-option" onclick="vote(${index + 1})">${option}</button>
+                            `).join('')}
+                        </div>
+                        <p class="timer">Time remaining: ${chapter.timeRemaining}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderVotingResults(results) {
+            return `
+                <div class="vote-results">
+                    ${results.map(result => `
+                        <div class="vote-option">
+                            <p>${result.option}</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${result.votes}%"></div>
+                            </div>
+                            <p>${result.votes}% ${result.winner ? '(Winner)' : ''}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function toggleChapter(chapterId) {
+            const chapter = document.getElementById(chapterId);
+            const allChapters = document.querySelectorAll('.chapter-content');
+            
+            allChapters.forEach(ch => {
+                if (ch.id !== chapterId) {
+                    ch.style.display = 'none';
+                }
+            });
+
+            chapter.style.display = chapter.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function vote(optionId) {
+            // Implement voting logic here
+            alert('Vote registered for option ' + optionId);
+        }
+
+        // Load story when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get story ID from URL parameter or default to 'dark-manor'
+            const urlParams = new URLSearchParams(window.location.search);
+            const storyId = urlParams.get('story') || 'dark-manor';
+            loadStory(storyId);
+        });
+    </script>
+</body>
+</html>
