@@ -242,28 +242,28 @@
                     chapters: [
                         {
                             id: 1,
-                            title: 'The Arrival',
-                            content: 'The old manor loomed before me, its gothic spires reaching toward the stormy sky...',
+                            title: 'Прибытие',
+                            content: 'Передо мной вырисовывалось старое поместье, его готические шпили тянутся к грозовому небу...',
                             status: 'completed',
                             votingResults: [
-                                { option: 'Enter through the front door', votes: 65, winner: true },
-                                { option: 'Look for a back entrance', votes: 35, winner: false }
+                                { option: 'Войти через главную дверь', votes: 65, winner: true },
+                                { option: 'Поискать вход за домом', votes: 35, winner: false }
                             ]
                         },
                         {
                             id: 2,
-                            title: 'Dark Corridors',
-                            content: 'The heavy door creaked open, revealing a dimly lit hallway...',
+                            title: 'Темные коридоры',
+                            content: 'Тяжелая дверь отворилать, открывая путь на этаж...',
                             status: 'active',
                             votingOptions: [
-                                'Follow the strange sounds upstairs',
-                                'Investigate the flickering light in the basement',
-                                'Search the ground floor first'
+                                'Последовать за странными звуками наверх',
+                                'Исследовать мигающий свет в подвале',
+                                'Исследовать этот этаж в начале'
                             ],
                             timeRemaining: '23:45:12'
                         }
                     ],
-                    status: 'Active',
+                    status: 'Пишется',
                     ageRating: '16+'
                 }
                 // Add more stories here
@@ -276,7 +276,7 @@
 
             const container = document.getElementById('storyContent');
             container.innerHTML = `
-                <a href="index.html" class="back-button">← Back to Stories</a>
+                <a href="index.html" class="back-button">← Назад</a>
                 <div class="story-header">
                     <div class="story-info">
                         <div class="story-main">
@@ -300,7 +300,7 @@
         function renderChapters(chapters) {
             return chapters.map(chapter => `
                 <div class="chapter-item" onclick="toggleChapter('chapter${chapter.id}')">
-                    <h3>Chapter ${chapter.id}: ${chapter.title}</h3>
+                    <h3>Глава ${chapter.id}: ${chapter.title}</h3>
                     <div id="chapter${chapter.id}" class="chapter-content">
                         <div class="chapter-text">
                             <p>${chapter.content}</p>
@@ -315,20 +315,20 @@
             if (chapter.status === 'completed') {
                 return `
                     <div class="voting-section">
-                        <h4>Previous Voting Results:</h4>
+                        <h4>Результат предыдущего голосования:</h4>
                         ${renderVotingResults(chapter.votingResults)}
                     </div>
                 `;
             } else {
                 return `
                     <div class="voting-section">
-                        <h4>Current Voting:</h4>
+                        <h4>Текущее голосование:</h4>
                         <div class="voting-options">
                             ${chapter.votingOptions.map((option, index) => `
                                 <button class="vote-option" onclick="vote(${index + 1})">${option}</button>
                             `).join('')}
                         </div>
-                        <p class="timer">Time remaining: ${chapter.timeRemaining}</p>
+                        <p class="timer">Времени осталось: ${chapter.timeRemaining}</p>
                     </div>
                 `;
             }
