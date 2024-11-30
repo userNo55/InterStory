@@ -1,5 +1,5 @@
 // Initialize Supabase client (make sure to replace with your project URL and API key)
-const supabase = createClient('YOUR_SUPABASE_PROJECT_URL', 'YOUR_SUPABASE_ANON_KEY');
+const supabase = createClient('https://adikbynxabweptbqkktd.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkaWtieW54YWJ3ZXB0YnFra3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI5OTQ5NjcsImV4cCI6MjA0ODU3MDk2N30.gFlrUoJRnv_OjLYy_kBGgRYeBf-aK_TuZ5JtRkTNiP8');
 
 // Function to add a new story to Supabase
 async function addNewStory(storyData) {
