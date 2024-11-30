@@ -227,7 +227,35 @@
                 transform: scale(1.1);
                 box-shadow: 0 0 15px var(--accent-color);
               }
-        }
+            .profile-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background-color: #007bff;
+                color: white;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                cursor: pointer;
+                transition: transform 0.2s ease;
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                z-index: 1000;
+              }
+            .profile-dropdown {
+                display: none;
+                position: fixed;
+                top: 60px;
+                right: 10px;
+                background-color: white;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 10px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                z-index: 1001;
+              }
     </style>
 </head>
 <body>
@@ -356,5 +384,64 @@
             window.location.href = `story1.html?id=${storyId}`;
         }
     </script>
+    <!-- Add this at the end of your <body> section -->
+<div class="profile-container">
+    <div id="profileIcon" class="profile-icon">JD</div>
+    <div id="profileDropdown" class="profile-dropdown">
+        <p>John Doe</p>
+        <button id="profileEdit">Edit Profile</button>
+        <button id="profileLogout">Logout</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const profileIcon = document.getElementById('profileIcon');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        // Toggle dropdown
+        profileIcon.addEventListener('click', (event) => {
+            event.stopPropagation();
+            profileDropdown.style.display = 
+                profileDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close dropdown if clicked outside
+        document.addEventListener('click', () => {
+            profileDropdown.style.display = 'none';
+        });
+
+        // Prevent dropdown from closing when clicking inside
+        profileDropdown.addEventListener('click', (event) => {
+            event.stopPropagation();
+        });
+
+        // Example event handlers (replace with your actual logic)
+        document.getElementById('profileEdit').addEventListener('click', () => {
+            alert('Edit Profile Clicked');
+        });
+
+        document.getElementById('profileLogout').addEventListener('click', () => {
+            alert('Logout Clicked');
+        });
+
+        // Function to update profile icon
+        function updateProfileIcon(name, bgColor) {
+            const icon = document.getElementById('profileIcon');
+            const initials = name.split(' ')
+                .map(word => word[0].toUpperCase())
+                .join('')
+                .slice(0,2);
+            
+            icon.textContent = initials;
+            if (bgColor) {
+                icon.style.backgroundColor = bgColor;
+            }
+        }
+
+        // Example usage - replace with actual user data
+        updateProfileIcon('John Doe', '#28a745');
+    });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </body></html>
