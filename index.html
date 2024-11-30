@@ -267,71 +267,71 @@
     </header>
 
     <div class="tab-container">
-        <button class="tab active" onclick="switchTab('active')">Active</button>
-        <button class="tab" onclick="switchTab('written')">Written</button>
-        <button class="tab" onclick="switchTab('подписки')">Followings</button>
+        <button class="tab active" onclick="switchTab('active')">Пишутся</button>
+        <button class="tab" onclick="switchTab('written')">Завершенные</button>
+        <button class="tab" onclick="switchTab('followings')">Подписки</button>
     </div>
 
     <div id="active-stories" class="story-list">
         <div class="story-card" onclick="openStory('story1')">
-            <h3>The Mystery of Dark Manor</h3>
-            <p>Author: Alex Peterson</p>
-            <p class="timer">Time remaining: 23:45:12</p>
-            <p>Readers: 1,234</p>
+            <h3>Загадка мрачного поместья</h3>
+            <p>Автор: Alex Peterson</p>
+            <p class="timer">Времени осталось: 23:45:12</p>
+            <p>Читателей: 1,234</p>
         </div>
         <div class="story-card" onclick="openStory('story2')">
-            <h3>Time Traveler's Diary</h3>
-            <p>Author: Maria Johnson</p>
-            <p class="timer">Time remaining: 11:30:00</p>
-            <p>Readers: 2,567</p>
+            <h3>Дневник путешественника во времени</h3>
+            <p>Автор: Maria Johnson</p>
+            <p class="timer">Времени осталось: 11:30:00</p>
+            <p>Читателей: 2,567</p>
         </div>
     </div>
 
     <div id="written-stories" class="story-list" style="display: none;">
         <div class="story-card" onclick="openStory('story3')">
-            <h3>The Last Hero</h3>
-            <p>Author: David Smith</p>
-            <p>Readers: 5,678</p>
+            <h3>Финанльный герой</h3>
+            <p>Автор: David Smith</p>
+            <p>Читателей: 5,678</p>
         </div>
         <div class="story-card" onclick="openStory('story4')">
-            <h3>Red Moon Rising</h3>
-            <p>Author: Helen Morrison</p>
-            <p>Readers: 3,456</p>
+            <h3>Восход Красной Луны</h3>
+            <p>Автор: Helen Morrison</p>
+            <p>Читателей: 3,456</p>
         </div>
     </div>
 
     <div id="followings-stories" class="story-list" style="display: none;">
         <div class="story-card" onclick="openStory('story5')">
-            <h3>Cyber Dreams</h3>
-            <p>Author: James Wilson</p>
+            <h3>КиберСны</h3>
+            <p>Автор: James Wilson</p>
             <p class="timer">Time remaining: 15:20:00</p>
-            <p>Readers: 4,321</p>
+            <p>Читателей: 4,321</p>
         </div>
         <div class="story-card" onclick="openStory('story6')">
-            <h3>Neon Nights</h3>
-            <p>Author: Sarah Blake</p>
-            <p>Readers: 6,789</p>
+            <h3>Неоновые ночи</h3>
+            <p>Автор: Sarah Blake</p>
+            <p>Читателей: 6,789</p>
         </div>
     </div>
 
     <div class="modal-overlay" onclick="toggleSearch()"></div>
     <div class="search-modal">
-        <h2>Search Stories</h2>
+        <h2>Поиск историй</h2>
         <form class="search-form">
             <input type="text" placeholder="Keywords">
             <select>
-                <option>All Sizes</option>
-                <option>Short Stories</option>
-                <option>Medium Length</option>
-                <option>Long Stories</option>
+                <option>Любой размер</option>
+                <option>Короткие</option>
+                <option>Средние</option>
+                <option>Длинные</option>
             </select>
             <select>
-                <option>All Age Ratings</option>
+                <option>Всех рейтингов</option>
                 <option>12+</option>
                 <option>16+</option>
                 <option>18+</option>
             </select>
-            <button type="submit">Search</button>
+            <button type="submit">Искать</button>
         </form>
     </div>
 
@@ -374,7 +374,7 @@
         }
 
         function openProfile() {
-            window.location.href = '/profile';
+            window.location.href = 'profile.html?id=${storyId}';
         }
 
         function openStory(storyId) {
