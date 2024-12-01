@@ -1,254 +1,287 @@
-import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Stories</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #FF6B99;
+            --secondary-color: #4DE3E3;
+            --accent-color: #FFE74C;
+            --background-color: #000033;
+            --text-color: #FFFFFF;
+        }
 
-// Supabase configuration - replace with your actual project URL and API key
-const supabaseUrl = process.env.https://adikbynxabweptbqkktd.supabase.co;
-const supabaseAnonKey = process.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkaWtieW54YWJ3ZXB0YnFra3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI5OTQ5NjcsImV4cCI6MjA0ODU3MDk2N30.gFlrUoJRnv_OjLYy_kBGgRYeBf-aK_TuZ5JtRkTNiP8;
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
 
-// Create Supabase client
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
 
-const InteractiveStories = () => {
-  const [activeStories, setActiveStories] = useState([]);
-  const [writtenStories, setWrittenStories] = useState([]);
-  const [followingStories, setFollowingStories] = useState([]);
-  const [currentTab, setCurrentTab] = useState('active');
-  const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const [searchParams, setSearchParams] = useState({
-    keywords: '',
-    storyLength: 'All Sizes',
-    ageRating: 'All Age Ratings'
-  });
+        .header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-  // Fetch stories based on different categories
-  const fetchStories = async () => {
-    try {
-      // Active Stories (with time remaining)
-      const { data: activeData, error: activeError } = await supabase
-        .from('story')
-        .select('*')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
 
-      // Written Stories (completed or archived)
-      const { data: writtenData, error: writtenError } = await supabase
-        .from('story')
-        .select('*')
-        .eq('status', 'completed')
-        .order('created_at', { ascending: false });
+        .tab {
+            padding: 0.8rem 2rem;
+            background: transparent;
+            color: var(--text-color);
+            border: 2px solid var(--primary-color);
+            cursor: pointer;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+        }
 
-      // Following Stories (based on user's follows)
-      const { data: followingData, error: followingError } = await supabase
-        .from('story')
-        .select('*')
-        .in('id', await getFollowedStoryIds())
-        .order('created_at', { ascending: false });
+        .tab.active {
+            background: var(--primary-color);
+        }
 
-      if (activeError) console.error('Active Stories Error:', activeError);
-      if (writtenError) console.error('Written Stories Error:', writtenError);
-      if (followingError) console.error('Following Stories Error:', followingError);
+        .story-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
 
-      setActiveStories(activeData || []);
-      setWrittenStories(writtenData || []);
-      setFollowingStories(followingData || []);
-    } catch (error) {
-      console.error('Story Fetch Error:', error);
-    }
-  };
+        .story-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--secondary-color);
+            padding: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
 
-  // Get story IDs that the user follows
-  const getFollowedStoryIds = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+        .story-card:hover {
+            transform: scale(1.05);
+        }
 
-    const { data: followData, error } = await supabase
-      .from('user_story_follows')
-      .select('story_id')
-      .eq('user_id', user.id);
+        .search-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--background-color);
+            border: 2px solid var(--secondary-color);
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            display: none;
+            z-index: 1000;
+        }
 
-    if (error) {
-      console.error('Follow Fetch Error:', error);
-      return [];
-    }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            z-index: 999;
+        }
 
-    return followData.map(follow => follow.story_id);
-  };
+        .modal-overlay.active, 
+        .search-modal.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Interactive Stories</h1>
+            <button id="searchButton">🔍 Search</button>
+        </header>
 
-  // Real-time subscription to story updates
-  useEffect(() => {
-    fetchStories();
+        <div class="tabs">
+            <button class="tab active" data-tab="active">Active</button>
+            <button class="tab" data-tab="written">Written</button>
+            <button class="tab" data-tab="followings">Followings</button>
+        </div>
 
-    // Set up real-time subscription
-    const storySubscription = supabase
-      .channel('public:story')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'story' },
-        () => fetchStories()
-      )
-      .subscribe();
-
-    // Cleanup subscription on component unmount
-    return () => {
-      supabase.removeChannel(storySubscription);
-    };
-  }, []);
-
-  // Search functionality
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    const { keywords, storyLength, ageRating } = searchParams;
-
-    let query = supabase.from('story').select('*');
-
-    // Apply filters
-    if (keywords) {
-      query = query.or(`title.ilike.%${keywords}%,description.ilike.%${keywords}%`);
-    }
-
-    if (storyLength !== 'All Sizes') {
-      // Assuming you have a 'story_length' column in your stories table
-      query = query.eq('story_length', storyLength.toLowerCase());
-    }
-
-    if (ageRating !== 'All Age Ratings') {
-      query = query.eq('age_rating', ageRating);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Search Error:', error);
-      return;
-    }
-
-    // You might want to set a specific state for search results
-    setActiveStories(data);
-    setSearchModalOpen(false);
-  };
-
-  // Render story cards
-  const renderStoryCards = (stories) => (
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-      {stories.map(story => (
-        <Card 
-          key={story.id} 
-          className="hover:scale-105 transition-transform cursor-pointer"
-          onClick={() => window.location.href = `/story/${story.id}`}
-        >
-          <CardHeader>
-            <CardTitle>{story.title}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Author: {story.author_name}</p>
-            {story.time_remaining && (
-              <p className="text-primary">
-                Time remaining: {story.time_remaining}
-              </p>
-            )}
-            <p>Readers: {story.reader_count || 0}</p>
-          </CardContent>
-        </Card>
-      ))}
+        <div id="storyGrid" class="story-grid"></div>
     </div>
-  );
 
-  return (
-    <div className="container mx-auto p-4">
-      <Tabs 
-        value={currentTab} 
-        onValueChange={setCurrentTab}
-        className="w-full"
-      >
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="written">Written</TabsTrigger>
-          <TabsTrigger value="followings">Followings</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="active">
-          {renderStoryCards(activeStories)}
-        </TabsContent>
-        
-        <TabsContent value="written">
-          {renderStoryCards(writtenStories)}
-        </TabsContent>
-        
-        <TabsContent value="followings">
-          {renderStoryCards(followingStories)}
-        </TabsContent>
-      </Tabs>
-
-      {/* Search Modal */}
-      {searchModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-background p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-2xl mb-4">Search Stories</h2>
-            <form onSubmit={handleSearch} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Keywords"
-                value={searchParams.keywords}
-                onChange={(e) => setSearchParams(prev => ({
-                  ...prev, 
-                  keywords: e.target.value
-                }))}
-                className="w-full p-2 border rounded"
-              />
-              <select
-                value={searchParams.storyLength}
-                onChange={(e) => setSearchParams(prev => ({
-                  ...prev, 
-                  storyLength: e.target.value
-                }))}
-                className="w-full p-2 border rounded"
-              >
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="search-modal" id="searchModal">
+        <h2>Search Stories</h2>
+        <form id="searchForm">
+            <input type="text" id="keywordSearch" placeholder="Search keywords">
+            <select id="storyLength">
                 <option>All Sizes</option>
                 <option>Short Stories</option>
                 <option>Medium Length</option>
                 <option>Long Stories</option>
-              </select>
-              <select
-                value={searchParams.ageRating}
-                onChange={(e) => setSearchParams(prev => ({
-                  ...prev, 
-                  ageRating: e.target.value
-                }))}
-                className="w-full p-2 border rounded"
-              >
+            </select>
+            <select id="ageRating">
                 <option>All Age Ratings</option>
                 <option>12+</option>
                 <option>16+</option>
                 <option>18+</option>
-              </select>
-              <button 
-                type="submit" 
-                className="w-full p-2 bg-primary text-white rounded"
-              >
-                Search
-              </button>
-            </form>
-            <button 
-              onClick={() => setSearchModalOpen(false)}
-              className="w-full mt-2 p-2 bg-secondary text-white rounded"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Search Button */}
-      <button 
-        onClick={() => setSearchModalOpen(true)}
-        className="fixed top-4 right-20 bg-primary text-white p-2 rounded-full"
-      >
-        🔍 Search
-      </button>
+            </select>
+            <button type="submit">Search</button>
+            <button type="button" id="closeSearch">Close</button>
+        </form>
     </div>
-  );
-};
 
-export default InteractiveStories;
+    <script>
+        // Supabase Configuration
+        const supabaseUrl = 'https://adikbynxabweptbqkktd.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkaWtieW54YWJ3ZXB0YnFra3RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI5OTQ5NjcsImV4cCI6MjA0ODU3MDk2N30.gFlrUoJRnv_OjLYy_kBGgRYeBf-aK_TuZ5JtRkTNiP8';
+        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        // DOM Elements
+        const storyGrid = document.getElementById('storyGrid');
+        const tabs = document.querySelectorAll('.tab');
+        const searchButton = document.getElementById('searchButton');
+        const searchModal = document.getElementById('searchModal');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const searchForm = document.getElementById('searchForm');
+        const closeSearchButton = document.getElementById('closeSearch');
+
+        // Current active tab state
+        let currentTab = 'active';
+
+        // Event Listeners
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                // Add active to clicked tab
+                tab.classList.add('active');
+                // Update current tab
+                currentTab = tab.dataset.tab;
+                // Fetch and render stories for the tab
+                fetchStories();
+            });
+        });
+
+        // Search Modal Toggle
+        searchButton.addEventListener('click', () => {
+            searchModal.classList.add('active');
+            modalOverlay.classList.add('active');
+        });
+
+        closeSearchButton.addEventListener('click', () => {
+            searchModal.classList.remove('active');
+            modalOverlay.classList.remove('active');
+        });
+
+        modalOverlay.addEventListener('click', () => {
+            searchModal.classList.remove('active');
+            modalOverlay.classList.remove('active');
+        });
+
+        // Search Form Submit
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const keywords = document.getElementById('keywordSearch').value;
+            const storyLength = document.getElementById('storyLength').value;
+            const ageRating = document.getElementById('ageRating').value;
+
+            await fetchStories(keywords, storyLength, ageRating);
+            
+            searchModal.classList.remove('active');
+            modalOverlay.classList.remove('active');
+        });
+
+        // Fetch Stories
+        async function fetchStories(keywords = '', storyLength = 'All Sizes', ageRating = 'All Age Ratings') {
+            try {
+                // Base query
+                let query = supabase.from('story').select('*');
+
+                // Apply filters based on current tab
+                switch(currentTab) {
+                    case 'active':
+                        query = query.eq('status', 'active');
+                        break;
+                    case 'written':
+                        query = query.eq('status', 'completed');
+                        break;
+                    case 'followings':
+                        // This would require user authentication
+                        // For demo, just show all
+                        break;
+                }
+
+                // Apply search filters
+                if (keywords) {
+                    query = query.or(`title.ilike.%${keywords}%,description.ilike.%${keywords}%`);
+                }
+
+                if (storyLength !== 'All Sizes') {
+                    query = query.eq('story_length', storyLength.toLowerCase());
+                }
+
+                if (ageRating !== 'All Age Ratings') {
+                    query = query.eq('age_rating', ageRating);
+                }
+
+                // Execute query
+                const { data: stories, error } = await query;
+
+                if (error) throw error;
+
+                // Render stories
+                renderStories(stories);
+            } catch (error) {
+                console.error('Error fetching stories:', error);
+                storyGrid.innerHTML = `<p>Error loading stories: ${error.message}</p>`;
+            }
+        }
+
+        // Render Stories
+        function renderStories(stories) {
+            // Clear previous stories
+            storyGrid.innerHTML = '';
+
+            // If no stories
+            if (!stories || stories.length === 0) {
+                storyGrid.innerHTML = '<p>No stories found.</p>';
+                return;
+            }
+
+            // Render story cards
+            stories.forEach(story => {
+                const storyCard = document.createElement('div');
+                storyCard.classList.add('story-card');
+                storyCard.innerHTML = `
+                    <h3>${story.title}</h3>
+                    <p>Author: ${story.author_name || 'Unknown'}</p>
+                    ${story.time_remaining ? `<p>Time remaining: ${story.time_remaining}</p>` : ''}
+                    <p>Readers: ${story.reader_count || 0}</p>
+                `;
+                storyCard.addEventListener('click', () => {
+                    // Navigate to story page
+                    window.location.href = `/story/${story.id}`;
+                });
+                storyGrid.appendChild(storyCard);
+            });
+        }
+
+        // Initial load
+        fetchStories();
+    </script>
+</body>
+</html>
