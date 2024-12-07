@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список историй</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            border: 1px solid #ccc;
+        }
+
+        .tab.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .story-list {
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .story-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .story-details {
+            flex-grow: 1;
+        }
+
+        .story-meta {
+            color: #666;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        .time-remaining {
+            font-weight: bold;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="tabs">
+        <div class="tab active" data-status="active">Активные истории</div>
+        <div class="tab" data-status="completed">Законченные истории</div>
+    </div>
+
+    <div id="storyList" class="story-list">
+        <!-- Истории будут динамически загружаться сюда -->
+    </div>
+
+    <script>
+        // Замените на ваши реальные данные Supabase
+        const supabaseUrl = 'YOUR_SUPABASE_URL';
+        const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+        const tabs = document.querySelectorAll('.tab');
+        const storyList = document.getElementById('storyList');
+
+        // Функция форматирования оставшегося времени
+        function formatTimeRemaining(timeRemaining) {
+            if (!timeRemaining) return 'N/A';
+            const days = Math.floor(timeRemaining / (24 * 60 * 60));
+            const hours = Math.floor((timeRemaining % (24 * 60 * 60)) / (60 * 60));
+            const minutes = Math.floor((timeRemaining % (60 * 60)) / 60);
+            return `${days}д ${hours}ч ${minutes}м`;
+        }
+
+        // Функция загрузки историй
+        async function loadStories(status) {
+            try {
+                const { data, error } = await supabase
+                    .from('story')
+                    .select('*')
+                    .eq('status', status)
+                    .order('reader_count', { ascending: false });
+
+                if (error) throw error;
+
+                storyList.innerHTML = data.map(story => `
+                    <div class="story-item">
+                        <div class="story-details">
+                            <h3>${story.title}</h3>
+                            <div class="story-meta">
+                                Автор: ${story.author} | 
+                                Читатели: ${story.reader_count} | 
+                                Возр. рейтинг: ${story.age_rating} | 
+                                Главы: ${story.chapters}
+                            </div>
+                            <div class="time-remaining">
+                                Осталось: ${formatTimeRemaining(story.time_remaining)}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Ошибка при загрузке историй:', err);
+                storyList.innerHTML = '<p>Не удалось загрузить истории</p>';
+            }
+        }
+
+        // Обработчик переключения вкладок
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                loadStories(tab.dataset.status);
+            });
+        });
+
+        // Загрузка активных историй при первом запуске
+        loadStories('active');
+    </script>
+</body>
+</html>
